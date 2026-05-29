@@ -1,0 +1,15 @@
+services:
+  springboot-app-prod:
+    build: .
+    container_name: springboot-app-prod
+    ports:
+      - "8081:8080"
+    restart: always
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    networks:
+      - prod-network
+
+networks:
+  prod-network:
+    driver: bridge
