@@ -3,53 +3,67 @@ pipeline {
     
     environment {
         DOCKER_IMAGE = 'madanrayamajhi/springboot-app'
-        DOCKER_TAG = "${env.BUILD_NUMBER}"
+        EC2_HOST = '54.205.205.48'
     }
     
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                git branch: 'main',
+                    credentialsId: 'github-credentials',
+                    url: 'https://github.com/MadanRayamajhi/springboot-app.git'
             }
         }
         
-        stage('Build with Maven') {
+        stage('Build & Test') {
             steps {
+                sh 'chmod +x mvnw'
                 sh './mvnw clean compile'
+                sh './mvnw test'
             }
         }
         
-        stage('Run Tests') {
+        stage('SonarQube Analysis') {
             steps {
-                sh './mvnw test'
+                withSonarQubeEnv('SonarQube') {
+                    sh './mvnw sonar:sonar'
+                }
+            }
+        }
+        
+        stage('Package') {
+            steps {
+                sh './mvnw package -DskipTests'
             }
         }
         
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
-                sh "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
-            }
-        }
-        
-        stage('Push to DockerHub') {
-            steps {
-                withDockerRegistry([credentialsId: 'dockerhub-creds', url: '']) {
-                    sh "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
-                    sh "docker push ${DOCKER_IMAGE}:latest"
+                script {
+                    docker.build("${DOCKER_IMAGE}:latest")
                 }
             }
         }
         
-        stage('Deploy to EC2 Instance') {
+        stage('Push to Docker Hub') {
             steps {
-                sshagent(['deploy-server-cred']) {
+                script {
+                    docker.withRegistry('', 'docker-hub-credentials') {
+                        docker.image("${DOCKER_IMAGE}:latest").push()
+                    }
+                }
+            }
+        }
+        
+        stage('Deploy to EC2') {
+            steps {
+                sshagent(['ec2-ssh-key']) {
                     sh """
-                        ssh -o StrictHostKeyChecking=no ec2-user@32.198.49.239 "
-                            docker pull ${DOCKER_IMAGE}:${DOCKER_TAG} &&
+                        ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} "
+                            docker pull ${DOCKER_IMAGE}:latest &&
                             docker stop springboot-app || true &&
                             docker rm springboot-app || true &&
-                            docker run -d --name springboot-app -p 8080:8080 ${DOCKER_IMAGE}:${DOCKER_TAG}
+                            docker run -d --name springboot-app -p 8081:8080 ${DOCKER_IMAGE}:latest
                         "
                     """
                 }
@@ -59,11 +73,11 @@ pipeline {
     
     post {
         success {
-            echo 'Pipeline completed successfully!'
-            echo "Deployed to http://32.198.49.239:8080"
+            echo '🎉 Pipeline completed successfully!'
+            echo "App available at: http://${EC2_HOST}:8081"
         }
         failure {
-            echo 'Pipeline failed! Check the logs above.'
+            echo '❌ Pipeline failed!'
         }
     }
 }
