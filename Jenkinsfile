@@ -49,14 +49,37 @@ pipeline {
                 }
             }
         }
+        
+        stage('Deploy to Server') {
+            steps {
+                sshagent(['deploy-server-cred']) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no user@your-server-ip "
+                            docker pull ${DOCKER_IMAGE}:${DOCKER_TAG} &&
+                            docker stop health-check-app || true &&
+                            docker rm health-check-app || true &&
+                            docker run -d --name health-check-app -p 8080:8080 ${DOCKER_IMAGE}:${DOCKER_TAG}
+                        "
+                    """
+                }
+            }
+        }
     }
     
     post {
         success {
-            echo 'Pipeline completed successfully!'
+            emailext (
+                subject: "Pipeline Success - ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
+                body: "Pipeline executed successfully. Image: ${DOCKER_IMAGE}:${DOCKER_TAG}",
+                to: 'team@example.com'
+            )
         }
         failure {
-            echo 'Pipeline failed!'
+            emailext (
+                subject: "Pipeline Failed - ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
+                body: "Pipeline failed. Check console output: ${env.BUILD_URL}",
+                to: 'team@example.com'
+            )
         }
     }
 }
