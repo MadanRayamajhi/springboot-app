@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CI/CD Demo Project</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 800px;
+            width: 90%;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        
+        .status-badge {
+            background: #10b981;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            display: inline-block;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        
+        .message {
+            color: #4a5568;
+            font-size: 1.2rem;
+            margin: 20px 0;
+        }
+        
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .card {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 15px;
+            flex: 1;
+            min-width: 150px;
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .card p {
+            color: #718096;
+        }
+        
+        .nav-links {
+            margin-top: 30px;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+        
+        .nav-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            transition: opacity 0.3s;
+        }
+        
+        .nav-btn:hover {
+            opacity: 0.9;
+        }
+        
+        .health-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        
+        .health-section a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        footer {
+            margin-top: 30px;
+            color: #a0aec0;
+            font-size: 0.8rem;
+        }
+        
+        .timestamp {
+            font-size: 0.7rem;
+            color: #a0aec0;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 th:text="${title}">CI/CD Demo Project</h1>
+        
+        <div class="status-badge">
+            System Online
+        </div>
+        
+        <div class="message" th:text="${message}">
+            Welcome message
+        </div>
+        
+        <div class="card-container">
+            <div class="card">
+                <h3>CI/CD Pipeline</h3>
+                <p>Jenkins | GitHub | Docker</p>
+            </div>
+            <div class="card">
+                <h3>Code Quality</h3>
+                <p>SonarQube Integration</p>
+            </div>
+            <div class="card">
+                <h3>Cloud Deployment</h3>
+                <p>AWS EC2 Production</p>
+            </div>
+        </div>
+        
+        <div class="nav-links">
+            <a href="/" class="nav-btn">Home</a>
+            <a href="/about" class="nav-btn">About</a>
+            <a href="/health" class="nav-btn">Health Check</a>
+        </div>
+        
+        <div class="health-section">
+            <p>Health Check Endpoint: <a href="/health">/health</a></p>
+            <p>API Info: <a href="/api/info">/api/info</a></p>
+        </div>
+        
+        <footer>
+            <p>Spring Boot CI/CD Demo | Pipeline Status: Active</p>
+            <div class="timestamp" th:text="'Server Time: ' + ${timestamp}"></div>
+        </footer>
+    </div>
+</body>
+</html>

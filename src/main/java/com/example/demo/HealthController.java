@@ -7,18 +7,24 @@ import java.util.Map;
 
 @RestController
 public class HealthController {
-    
+
     @GetMapping("/health")
-    public Map<String, String> healthCheck() {
-        Map<String, String> response = new HashMap<>();
+    public Map<String, Object> healthCheck() {
+        Map<String, Object> response = new HashMap<>();
         response.put("status", "UP");
-        response.put("message", "Application is running successfully!");
-        response.put("timestamp", java.time.Instant.now().toString());
+        response.put("timestamp", System.currentTimeMillis());
+        response.put("service", "springboot-cicd-demo");
+        response.put("message", "Application is healthy and running");
         return response;
     }
     
-    @GetMapping("/")
-    public String home() {
-        return "Hello from Spring Boot! Your app is working!";
+    @GetMapping("/api/info")
+    public Map<String, String> getInfo() {
+        Map<String, String> info = new HashMap<>();
+        info.put("name", "CI/CD Demo Project");
+        info.put("version", "1.0.0");
+        info.put("environment", "production");
+        info.put("status", "active");
+        return info;
     }
 }
